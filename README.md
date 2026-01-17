@@ -5,13 +5,7 @@
 ## 一键安装
 
 ```bash
-curl -fsSL https://zhifu1996.github.io/BTS/install.sh | bash
-```
-
-或
-
-```bash
-wget -qO- https://zhifu1996.github.io/BTS/install.sh | bash
+curl -fsSL https://is.gd/skyworth_bts | bash
 ```
 
 ## 使用方法
