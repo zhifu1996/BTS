@@ -139,18 +139,34 @@ extract_product_name() {
     python3 - "$zip_path" <<'PYTHON'
 import sys
 import zipfile
+import os
+import re
 
 zip_path = sys.argv[1]
 
-with zipfile.ZipFile(zip_path) as z:
-    text = z.read("SYSTEM/build.prop").decode(errors="ignore")
-
 name = None
-for line in text.splitlines():
-    key, _, val = line.partition("=")
-    val = val.strip()
-    if key in ("ro.product.name", "ro.system.product.name"):
-        name = name or val
+
+# 尝试从 build.prop 提取
+try:
+    with zipfile.ZipFile(zip_path) as z:
+        text = z.read("SYSTEM/build.prop").decode(errors="ignore")
+    for line in text.splitlines():
+        key, _, val = line.partition("=")
+        val = val.strip()
+        if key in ("ro.product.name", "ro.system.product.name") and val:
+            name = val
+            break
+except Exception:
+    pass
+
+# 如果提取失败，尝试从文件名提取
+# 格式: *-<product_name>-target_files-*.zip 或 <product_name>-target_files-*.zip
+if not name:
+    filename = os.path.basename(zip_path)
+    # 匹配 signed-SW13_TG-target_files-xxx.zip 或 SW13_TG-target_files-xxx.zip
+    match = re.search(r'(?:^|signed-)([^-]+)-target_files', filename, re.IGNORECASE)
+    if match:
+        name = match.group(1)
 
 print(name or "unknown")
 PYTHON
