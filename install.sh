@@ -70,7 +70,12 @@ detect_environment() {
 
     if [[ -f /proc/version ]]; then
         if grep -qi microsoft /proc/version 2>/dev/null; then
-            if [[ -d /run/WSL ]]; then
+            # 通过内核版本区分 WSL1 和 WSL2
+            # WSL1: 4.4.0-xxxxx-Microsoft
+            # WSL2: 5.x.x-microsoft-standard-WSL2
+            local kernel_version
+            kernel_version=$(uname -r)
+            if [[ "$kernel_version" == *"-microsoft-standard"* ]] || [[ "$kernel_version" == *"WSL2"* ]]; then
                 env_type="wsl2"
             else
                 env_type="wsl1"
