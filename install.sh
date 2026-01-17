@@ -299,8 +299,8 @@ print_usage() {
     echo "  bts_extract.sh ./skyworth-target-files.zip"
     echo
     echo "输出:"
-    echo "  - bts_out/BTS_<时间戳>.zip    打包后的镜像文件"
-    echo "  - bts_out/fingerprint.txt     提取的设备指纹"
+    echo "  - bts_out/<产品名>-<时间戳>/BTS_<时间戳>.zip"
+    echo "  - bts_out/<产品名>-<时间戳>/fingerprint.txt"
     echo
     echo "================================================"
     echo -e "${BOLD}依赖状态:${NC}"
