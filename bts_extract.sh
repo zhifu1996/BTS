@@ -139,14 +139,10 @@ extract_product_name() {
     python3 - "$zip_path" <<'PYTHON'
 import sys
 import zipfile
-import os
-import re
 
 zip_path = sys.argv[1]
 
 name = None
-
-# 尝试从 build.prop 提取
 try:
     with zipfile.ZipFile(zip_path) as z:
         text = z.read("SYSTEM/build.prop").decode(errors="ignore")
@@ -159,16 +155,30 @@ try:
 except Exception:
     pass
 
-# 如果提取失败，尝试从文件名提取
-# 格式: *-<product_name>-target_files-*.zip 或 <product_name>-target_files-*.zip
-if not name:
-    filename = os.path.basename(zip_path)
-    # 匹配 signed-SW13_TG-target_files-xxx.zip 或 SW13_TG-target_files-xxx.zip
-    match = re.search(r'(?:^|signed-)([^-]+)-target_files', filename, re.IGNORECASE)
-    if match:
-        name = match.group(1)
+print(name or "")
+PYTHON
+}
 
-print(name or "unknown")
+# ============================================================================
+# 从文件名提取 product name（用于目录命名）
+# ============================================================================
+extract_product_name_from_filename() {
+    local zip_path="$1"
+
+    python3 - "$zip_path" <<'PYTHON'
+import sys
+import os
+import re
+
+zip_path = sys.argv[1]
+filename = os.path.basename(zip_path)
+
+# 匹配 signed-SW13_TG-target_files-xxx.zip 或 SW13_TG-target_files-xxx.zip
+match = re.search(r'(?:^|signed-)([^-]+)-target_files', filename, re.IGNORECASE)
+if match:
+    print(match.group(1))
+else:
+    print("unknown")
 PYTHON
 }
 
@@ -307,9 +317,9 @@ main() {
     target_zip=$(get_target_zip "${1:-}")
     log_info "处理文件: $target_zip"
 
-    # 提取 product name 用于目录命名
+    # 提取 product name 用于目录命名（从文件名提取）
     local product_name
-    product_name=$(extract_product_name "$target_zip")
+    product_name=$(extract_product_name_from_filename "$target_zip")
     log_info "产品名称: $product_name"
 
     # 输出目录设置：<product_name>-<时间戳>
