@@ -113,10 +113,10 @@ for line in text.splitlines():
 for line in text.splitlines():
     key, _, val = line.partition("=")
     val = val.strip()
-    if key in ("ro.product.brand", "ro.system.product.brand"):
-        brand = brand or val
-    elif key in ("ro.product.name", "ro.system.product.name"):
+    if key in ("ro.product.name", "ro.system.product.name"):
         name = name or val
+    elif key in ("ro.product.brand", "ro.system.product.brand"):
+        brand = brand or val
     elif key in ("ro.product.device", "ro.system.product.device"):
         device = device or val
 
@@ -127,6 +127,32 @@ else:
     bid = build_id or "unknown"
     incr = inc or "unknown"
     print(f"{brand}/{name}/{device}:{ver}/{bid}/{incr}:user/release-keys")
+PYTHON
+}
+
+# ============================================================================
+# 从 SYSTEM/build.prop 提取 product name
+# ============================================================================
+extract_product_name() {
+    local zip_path="$1"
+
+    python3 - "$zip_path" <<'PYTHON'
+import sys
+import zipfile
+
+zip_path = sys.argv[1]
+
+with zipfile.ZipFile(zip_path) as z:
+    text = z.read("SYSTEM/build.prop").decode(errors="ignore")
+
+name = None
+for line in text.splitlines():
+    key, _, val = line.partition("=")
+    val = val.strip()
+    if key in ("ro.product.name", "ro.system.product.name"):
+        name = name or val
+
+print(name or "unknown")
 PYTHON
 }
 
@@ -265,10 +291,16 @@ main() {
     target_zip=$(get_target_zip "${1:-}")
     log_info "处理文件: $target_zip"
 
-    # 输出目录设置
-    local out_dir="bts_out"
+    # 提取 product name 用于目录命名
+    local product_name
+    product_name=$(extract_product_name "$target_zip")
+    log_info "产品名称: $product_name"
+
+    # 输出目录设置：SW13_TG<product_name>-<时间戳>
     local timestamp
     timestamp=$(date +%Y%m%d_%H%M%S)
+    local sub_dir="SW13_TG${product_name}-${timestamp}"
+    local out_dir="bts_out/${sub_dir}"
     local out_zip="BTS_${timestamp}.zip"
     local fp_file="fingerprint.txt"
 
