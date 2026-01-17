@@ -288,10 +288,10 @@ print_usage() {
     echo -e "${BOLD}使用方法:${NC}"
     echo "================================================"
     echo
-    echo "  ${CYAN}bts_extract.sh <target_files.zip>${NC}"
+    echo -e "  ${CYAN}bts_extract.sh <target_files.zip>${NC}"
     echo
     echo "示例:"
-    echo "  bts_extract.sh ./xiaomi-target-files.zip"
+    echo "  bts_extract.sh ./skyworth-target-files.zip"
     echo
     echo "输出:"
     echo "  - bts_out/BTS_<时间戳>.zip    打包后的镜像文件"
