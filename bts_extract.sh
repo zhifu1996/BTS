@@ -296,10 +296,10 @@ main() {
     product_name=$(extract_product_name "$target_zip")
     log_info "产品名称: $product_name"
 
-    # 输出目录设置：SW13_TG<product_name>-<时间戳>
+    # 输出目录设置：<product_name>-<时间戳>
     local timestamp
     timestamp=$(date +%Y%m%d_%H%M%S)
-    local sub_dir="SW13_TG${product_name}-${timestamp}"
+    local sub_dir="${product_name}-${timestamp}"
     local out_dir="bts_out/${sub_dir}"
     local out_zip="BTS_${timestamp}.zip"
     local fp_file="fingerprint.txt"
